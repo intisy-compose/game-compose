@@ -1,0 +1,51 @@
+services:
+  # --- Playit.gg Tunnel (The Network "Boss") ---
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:latest
+    container_name: playit_agent
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    ports:
+      - "5520:5520/udp"
+      - "25565:25565"
+      - "19132:19132/udp"
+    environment:
+      - SECRET_KEY=5d91bbcf4870611e54cbd074083d00f0ec09e71c8db0bcb5c2ee4deebf20bd10
+
+  # --- Hytale Server ---
+  hytale:
+    image: deinfreu/hytale-server:experimental
+    container_name: hytale_server
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    network_mode: service:playit
+    depends_on:
+      - playit
+    environment:
+      SERVER_IP: "0.0.0.0"
+      SERVER_PORT: "5520"
+      PROD: "FALSE"
+      DEBUG: "FALSE"
+      TZ: "Europe/Berlin"
+    volumes:
+      - ./hytale_data:/home/container/game
+
+  # --- Minecraft Server ---
+  minecraft:
+    image: itzg/minecraft-server:java21
+    container_name: minecraft_server
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    network_mode: service:playit
+    depends_on:
+      - playit
+    environment:
+      EULA: "TRUE"
+      VERSION: "LATEST"
+      TYPE: "PAPER"
+      MEMORY: "4G"
+    volumes:
+      - ./mc_data:/data

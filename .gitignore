@@ -1,0 +1,11 @@
+logs/
+
+.cache/
+cache/
+libraries/
+versions/
+
+Server/
+
+*.jar
+*.zip
