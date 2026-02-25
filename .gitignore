@@ -5,7 +5,15 @@ cache/
 libraries/
 versions/
 
+session.lock
+.papermc-manifest.json
+.rcon-cli.env
+.rcon-cli.yaml
+.papermc-manifest.json
+.rcon-cli.env
+
 Server/
 
 *.jar
 *.zip
+*.tmp
