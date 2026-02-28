@@ -1,10 +1,10 @@
 logs/
-
 .cache/
 .disabled/
 *cache/
 libraries/
 versions/
+.paper-remapped/
 
 session.lock
 
@@ -16,6 +16,6 @@ session.lock
 
 Server/
 
-*.jar
+paper-*.jar
 *.zip
 *.tmp
