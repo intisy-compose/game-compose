@@ -1,0 +1,106 @@
+{
+    "general": {
+        "DoomsdayAnnihilationSelfDestructMode": false,
+        "commandSounds": true,
+        "debug": false,
+        "dumpMantleOnError": false,
+        "disableNMS": false,
+        "pluginMetrics": true,
+        "splashLogoStartup": true,
+        "useConsoleCustomColors": true,
+        "useCustomColorsIngame": true,
+        "adjustVanillaHeight": false,
+        "forceMainWorld": "",
+        "spinh": -20,
+        "spins": 7,
+        "spinb": 8,
+        "cartographerMessage": "Iris does not allow cartographers in its world due to crashes."
+    },
+    "world": {
+        "asyncTeleport": {
+            "enabled": false,
+            "loadViewDistance": 2,
+            "urgent": false
+        },
+        "postLoadBlockUpdates": true,
+        "forcePersistEntities": true,
+        "anbientEntitySpawningSystem": true,
+        "asyncTickIntervalMS": 700,
+        "targetSpawnEntitiesPerChunk": 0.95,
+        "markerEntitySpawningSystem": true,
+        "effectSystem": true,
+        "worldEditWandCUI": true,
+        "globalPregenCache": false
+    },
+    "gui": {
+        "useServerLaunchedGuis": true,
+        "maximumPregenGuiFPS": false,
+        "colorMode": true
+    },
+    "autoConfiguration": {
+        "configureSpigotTimeoutTime": true,
+        "configurePaperWatchdogDelay": true,
+        "autoRestartOnCustomBiomeInstall": true
+    },
+    "generator": {
+        "defaultWorldType": "overworld",
+        "maxBiomeChildDepth": 4,
+        "preventLeafDecay": true,
+        "useMulticore": false,
+        "useMulticoreMantle": false,
+        "offsetNoiseTypes": false,
+        "earlyCustomBlocks": false
+    },
+    "concurrency": {
+        "parallelism": -1,
+        "ioParallelism": -2,
+        "worldGenParallelism": -1
+    },
+    "studio": {
+        "studio": true,
+        "openVSCode": true,
+        "disableTimeAndWeather": true,
+        "autoStartDefaultStudio": false
+    },
+    "performance": {
+        "engineSVC": {
+            "useVirtualThreads": true,
+            "forceMulticoreWrite": false,
+            "priority": 5
+        },
+        "trimMantleInStudio": false,
+        "mantleKeepAlive": 30,
+        "noiseCacheSize": 1024,
+        "resourceLoaderCacheSize": 1024,
+        "objectLoaderCacheSize": 4096,
+        "scriptLoaderCacheSize": 512,
+        "tectonicPlateSize": -1,
+        "mantleCleanupDelay": 200
+    },
+    "updater": {
+        "maxConcurrency": 256,
+        "nativeThreads": false,
+        "threadMultiplier": 2,
+        "chunkLoadSensitivity": 0.7,
+        "emptyMsRange": {
+            "min": 80,
+            "max": 100
+        },
+        "defaultMsRange": {
+            "min": 20,
+            "max": 40
+        }
+    },
+    "pregen": {
+        "useCacheByDefault": true,
+        "useHighPriority": false,
+        "useVirtualThreads": false,
+        "useTicketQueue": true,
+        "maxConcurrency": 256
+    },
+    "sentry": {
+        "includeServerId": true,
+        "disableAutoReporting": false,
+        "debug": false
+    }
+}

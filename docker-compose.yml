@@ -34,7 +34,7 @@ services:
 
   # --- Minecraft Server ---
   minecraft:
-    image: itzg/minecraft-server:java21
+    image: itzg/minecraft-server:java21-jdk
     container_name: minecraft_server
     restart: unless-stopped
     tty: true
@@ -46,6 +46,6 @@ services:
       EULA: "TRUE"
       VERSION: "LATEST"
       TYPE: "PAPER"
-      MEMORY: "4G"
+      MEMORY: "16G"
     volumes:
       - ./mc_data:/data

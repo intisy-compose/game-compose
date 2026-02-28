@@ -1,11 +1,13 @@
 logs/
 
 .cache/
-cache/
+.disabled/
+*cache/
 libraries/
 versions/
 
 session.lock
+
 .papermc-manifest.json
 .rcon-cli.env
 .rcon-cli.yaml
