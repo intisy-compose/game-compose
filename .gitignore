@@ -1,5 +1,4 @@
 logs/
-.cache/
 .disabled/
 *cache/
 libraries/
@@ -13,9 +12,14 @@ session.lock
 .rcon-cli.yaml
 .papermc-manifest.json
 .rcon-cli.env
+.paper.env
+ops.json
+usercache.json
+version_history.json
 
 Server/
 
 paper-*.jar
 *.zip
 *.tmp
+
