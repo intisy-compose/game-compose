@@ -10,8 +10,6 @@ session.lock
 .papermc-manifest.json
 .rcon-cli.env
 .rcon-cli.yaml
-.papermc-manifest.json
-.rcon-cli.env
 .paper.env
 ops.json
 usercache.json
@@ -23,3 +21,10 @@ paper-*.jar
 *.zip
 *.tmp
 
+# Ark ASE
+ark_ase_data/ShooterGame/Saved/SavedArks/
+ark_ase_data/ShooterGame/Saved/Logs/
+
+# Ark ASA
+ark_asa_data/Saved/SavedArks/
+ark_asa_data/Saved/Logs/

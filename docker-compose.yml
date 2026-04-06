@@ -10,6 +10,13 @@ services:
       - "5520:5520/udp"
       - "25565:25565"
       - "19132:19132/udp"
+      - "7777:7777/udp"
+      - "7778:7778/udp"
+      - "27020:27020/tcp"
+      - "27015:27015/udp"
+      - "7779:7779/udp"
+      - "7780:7780/udp"
+      - "27021:27021/tcp"
     environment:
       - SECRET_KEY=5d91bbcf4870611e54cbd074083d00f0ec09e71c8db0bcb5c2ee4deebf20bd10
 
@@ -49,3 +56,65 @@ services:
       MEMORY: "16G"
     volumes:
       - ./mc_data:/data
+
+  # --- Ark: Survival Evolved Server ---
+  ark-ase:
+    image: hermsi/ark-server:latest
+    container_name: ark_ase_server
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    network_mode: service:playit
+    depends_on:
+      - playit
+    environment:
+      SESSION_NAME: "Ark Server"
+      SERVER_MAP: "TheIsland"
+      SERVER_PASSWORD: ""
+      ADMIN_PASSWORD: "changeme"
+      MAX_PLAYERS: "20"
+      UPDATE_ON_START: "true"
+      BACKUP_ON_STOP: "true"
+      PRE_UPDATE_BACKUP: "true"
+      WARN_ON_STOP: "true"
+      ENABLE_CROSSPLAY: "false"
+      DISABLE_BATTLEYE: "false"
+      GAME_CLIENT_PORT: "7777"
+      UDP_SOCKET_PORT: "7778"
+      RCON_PORT: "27020"
+      SERVER_LIST_PORT: "27015"
+      TZ: "Europe/Berlin"
+    volumes:
+      - ./ark_ase_data:/app
+
+  # --- Ark: Survival Ascended Server ---
+  ark-asa:
+    image: acekorneya/asa_server:latest
+    container_name: ark_asa_server
+    restart: unless-stopped
+    tty: true
+    stdin_open: true
+    network_mode: service:playit
+    depends_on:
+      - playit
+    environment:
+      PUID: "1001"
+      PGID: "1001"
+      BATTLEEYE: "FALSE"
+      RCON_ENABLED: "TRUE"
+      MAP_NAME: "TheIsland_WP"
+      SESSION_NAME: "Ark Ascended Server"
+      SERVER_ADMIN_PASSWORD: "changeme"
+      SERVER_PASSWORD: ""
+      ASA_PORT: "7779"
+      RCON_PORT: "27021"
+      MAX_PLAYERS: "20"
+      CLUSTER_ID: "cluster"
+      MOD_IDS: ""
+      CUSTOM_SERVER_ARGS: ""
+      UPDATE_SERVER: "TRUE"
+      CHECK_FOR_UPDATE_INTERVAL: "24"
+      TZ: "Europe/Berlin"
+    volumes:
+      - ./ark_asa_data:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame
+    mem_limit: 16G
