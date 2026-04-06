@@ -89,7 +89,7 @@ services:
 
   # --- Ark: Survival Ascended Server ---
   ark-asa:
-    image: acekorneya/asa_server:latest
+    image: acekorneya/asa_server:2_1_latest
     container_name: ark_asa_server
     restart: unless-stopped
     tty: true
