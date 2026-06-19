@@ -1,0 +1,40 @@
+# Applied by the launcher when the data folder can't chmod (Docker Desktop on
+# Windows). Runs Minecraft on a Linux volume and mirrors it to ./mc_data.
+services:
+  minecraft:
+    volumes: !override
+      - mc_data:/data
+    depends_on: !override
+      playit:
+        condition: service_started
+      minecraft-sync:
+        condition: service_healthy
+
+  minecraft-sync:
+    image: alpine:latest
+    container_name: minecraft_sync
+    restart: unless-stopped
+    volumes:
+      - mc_data:/config
+      - ./mc_data:/sync
+    command:
+      - sh
+      - -c
+      - |
+        apk add --no-cache rsync >/dev/null
+        rsync -rt --no-perms --no-owner --no-group --delete /sync/ /config/
+        touch /tmp/synced
+        while true; do
+          rsync -rt --no-perms --no-owner --no-group --delete /config/ /sync/
+          sleep 30
+        done
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/synced"]
+      interval: 5s
+      timeout: 3s
+      retries: 120
+      start_period: 10s
+
+volumes:
+  mc_data:
+    name: mc_data

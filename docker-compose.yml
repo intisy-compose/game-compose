@@ -49,7 +49,9 @@ services:
       - playit
     environment:
       EULA: "TRUE"
-      VERSION: "LATEST"
+      # Pinned: "LATEST" jumped to 26.1.2 (needs Java 25, breaks the Iris
+      # datapacks). Bump only after validating plugins.
+      VERSION: "1.21.11"
       TYPE: "PAPER"
       MEMORY: "16G"
     volumes:
