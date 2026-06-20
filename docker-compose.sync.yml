@@ -1,5 +1,6 @@
-# Applied by the launcher when the data folder can't chmod (Docker Desktop on
-# Windows). Runs Minecraft on a Linux volume and mirrors it to ./mc_data.
+# Applied by the launcher when the data partition can't chmod (Docker Desktop on
+# Windows). Every non-root game server breaks on such a bind mount, so each game
+# runs on a Linux volume and a single sidecar mirrors the volumes to the folders.
 services:
   minecraft:
     volumes: !override
@@ -7,34 +8,77 @@ services:
     depends_on: !override
       playit:
         condition: service_started
-      minecraft-sync:
+      data-sync:
         condition: service_healthy
 
-  minecraft-sync:
+  hytale:
+    volumes: !override
+      - hytale_data:/home/container/game
+    depends_on: !override
+      playit:
+        condition: service_started
+      data-sync:
+        condition: service_healthy
+
+  ark-ase:
+    volumes: !override
+      - ark_ase_data:/app
+    depends_on: !override
+      playit:
+        condition: service_started
+      data-sync:
+        condition: service_healthy
+
+  ark-asa:
+    volumes: !override
+      - ark_asa_data:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame
+    depends_on: !override
+      playit:
+        condition: service_started
+      data-sync:
+        condition: service_healthy
+
+  data-sync:
     image: alpine:latest
-    container_name: minecraft_sync
+    container_name: games_data_sync
     restart: unless-stopped
     volumes:
-      - mc_data:/config
-      - ./mc_data:/sync
+      - mc_data:/mc/config
+      - ./mc_data:/mc/sync
+      - hytale_data:/hytale/config
+      - ./hytale_data:/hytale/sync
+      - ark_ase_data:/ase/config
+      - ./ark_ase_data:/ase/sync
+      - ark_asa_data:/asa/config
+      - ./ark_asa_data:/asa/sync
     command:
       - sh
       - -c
       - |
         apk add --no-cache rsync >/dev/null
-        rsync -rt --no-perms --no-owner --no-group --delete /sync/ /config/
+        for g in mc hytale ase asa; do
+          rsync -rt --no-perms --no-owner --no-group --delete /$$g/sync/ /$$g/config/
+        done
         touch /tmp/synced
         while true; do
-          rsync -rt --no-perms --no-owner --no-group --delete /config/ /sync/
+          for g in mc hytale ase asa; do
+            rsync -rt --no-perms --no-owner --no-group --delete /$$g/config/ /$$g/sync/
+          done
           sleep 30
         done
     healthcheck:
       test: ["CMD", "test", "-f", "/tmp/synced"]
-      interval: 5s
+      interval: 10s
       timeout: 3s
-      retries: 120
-      start_period: 10s
+      retries: 180
+      start_period: 30s
 
 volumes:
   mc_data:
     name: mc_data
+  hytale_data:
+    name: hytale_data
+  ark_ase_data:
+    name: ark_ase_data
+  ark_asa_data:
+    name: ark_asa_data
