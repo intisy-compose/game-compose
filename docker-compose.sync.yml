@@ -56,13 +56,16 @@ services:
       - -c
       - |
         apk add --no-cache rsync >/dev/null
+        set -f
+        # Skip re-downloadable installs and temp files (images refetch these).
+        EX="--exclude=paper-*.jar --exclude=libraries/ --exclude=versions/ --exclude=cache/ --exclude=.cache/ --exclude=.paper-remapped/ --exclude=.java/ --exclude=crash-reports/ --exclude=logs/ --exclude=log/ --exclude=Assets.zip --exclude=Server/ --exclude=steamapps/ --exclude=Binaries/ --exclude=Content/ --exclude=*.sync-conflict-*"
         for g in mc hytale ase asa; do
-          rsync -rt --no-perms --no-owner --no-group --delete /$$g/sync/ /$$g/config/
+          rsync -rt --no-perms --no-owner --no-group --delete $$EX /$$g/sync/ /$$g/config/
         done
         touch /tmp/synced
         while true; do
           for g in mc hytale ase asa; do
-            rsync -rt --no-perms --no-owner --no-group --delete /$$g/config/ /$$g/sync/
+            rsync -rt --no-perms --no-owner --no-group --delete $$EX /$$g/config/ /$$g/sync/
           done
           sleep 30
         done
