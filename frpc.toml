@@ -4,6 +4,9 @@ serverAddr = "{{ .Envs.FRP_SERVER_ADDR }}"
 serverPort = {{ .Envs.FRP_SERVER_PORT }}
 auth.method = "token"
 auth.token = "{{ .Envs.FRP_TOKEN }}"
+# Keep retrying instead of exiting (exit churns the shared netns -> breaks the
+# game container's networking until frps is reachable).
+loginFailExit = false
 
 [[proxies]]
 name = "minecraft-java"

@@ -48,31 +48,42 @@ function Ensure-Frps {
     if (-not (Test-Path $sshKey)) { Write-Host "SSH key not found: $sshKey" -ForegroundColor Red; exit 1 }
     # Git's ssh tolerates the key's file permissions; Windows' ssh.exe rejects
     # them on this drive. Prefer Git's, fall back to whatever ssh is on PATH.
-    $sshExe = "ssh"
+    $sshExe = "ssh"; $scpExe = "scp"
     $git = Get-Command git -ErrorAction SilentlyContinue
-    if ($git) { $c = Join-Path (Split-Path (Split-Path $git.Source)) "usr\bin\ssh.exe"; if (Test-Path $c) { $sshExe = $c } }
+    if ($git) {
+        $bin = Join-Path (Split-Path (Split-Path $git.Source)) "usr\bin"
+        if (Test-Path "$bin\ssh.exe") { $sshExe = "$bin\ssh.exe" }
+        if (Test-Path "$bin\scp.exe") { $scpExe = "$bin\scp.exe" }
+    }
     $sshArgs = @("-i", $sshKey, "-o", "StrictHostKeyChecking=accept-new", "-o", "ConnectTimeout=20", "$sshUser@$frpServer")
+    $scpArgs = @("-i", $sshKey, "-o", "StrictHostKeyChecking=accept-new", "-o", "ConnectTimeout=20")
 
     Write-Step "Checking frps on $frpServer ..."
-    if ((& $sshExe @sshArgs "sudo docker ps --filter name=frps --format '{{.Names}}'" 2>$null) -match "frps") {
-        Write-OK "frps already running."; return
+    if ((& $sshExe @sshArgs "sudo ss -tln 2>/dev/null | grep -q ':$frpPort ' && echo UP" 2>$null) -match "UP") {
+        Write-OK "frps already listening on :$frpPort."; return
     }
 
     Write-Step "  Installing Docker if missing..."
     & $sshExe @sshArgs "command -v docker >/dev/null 2>&1 || (curl -fsSL https://get.docker.com | sudo sh)" 2>&1 | Out-Null
 
     Write-Step "  Opening firewall ports..."
-    & $sshExe @sshArgs 'for r in "tcp 7000" "tcp 25565" "udp 5520" "udp 7777" "udp 7778" "udp 7779" "udp 7780" "udp 19132" "udp 27015"; do set -- $r; sudo iptables -C INPUT -p $1 --dport $2 -j ACCEPT 2>/dev/null || sudo iptables -I INPUT 6 -p $1 --dport $2 -j ACCEPT; done; sudo DEBIAN_FRONTEND=noninteractive apt-get install -y netfilter-persistent >/dev/null 2>&1; sudo netfilter-persistent save >/dev/null 2>&1' 2>&1 | Out-Null
+    # No quotes in the remote command: PowerShell mangles embedded double-quotes
+    # when passing to ssh.exe, which silently breaks the loop.
+    & $sshExe @sshArgs 'for p in 7000 25565; do sudo iptables -C INPUT -p tcp --dport $p -j ACCEPT 2>/dev/null || sudo iptables -I INPUT 1 -p tcp --dport $p -j ACCEPT; done; for p in 5520 7777 7778 7779 7780 19132 27015; do sudo iptables -C INPUT -p udp --dport $p -j ACCEPT 2>/dev/null || sudo iptables -I INPUT 1 -p udp --dport $p -j ACCEPT; done; sudo DEBIAN_FRONTEND=noninteractive apt-get install -y netfilter-persistent >/dev/null 2>&1; sudo netfilter-persistent save >/dev/null 2>&1' 2>&1 | Out-Null
 
     Write-Step "  Writing frps config and starting frps..."
-    "bindPort = $frpPort`nauth.method = `"token`"`nauth.token = `"$frpToken`"`n" | & $sshExe @sshArgs "mkdir -p ~/frp && cat > ~/frp/frps.toml"
+    $tmpToml = Join-Path $env:TEMP "games-frps.toml"
+    [System.IO.File]::WriteAllText($tmpToml, "bindPort = $frpPort`nauth.method = `"token`"`nauth.token = `"$frpToken`"`n", (New-Object System.Text.UTF8Encoding($false)))
+    & $sshExe @sshArgs "mkdir -p ~/frp" 2>&1 | Out-Null
+    & $scpExe @scpArgs $tmpToml "${sshUser}@${frpServer}:frp/frps.toml" 2>&1 | Out-Null
+    Remove-Item $tmpToml -Force -ErrorAction SilentlyContinue
     & $sshExe @sshArgs 'sudo docker rm -f frps >/dev/null 2>&1; sudo docker run -d --name frps --restart unless-stopped --network host -v $HOME/frp/frps.toml:/etc/frp/frps.toml snowdreamtech/frps' 2>&1 | Out-Null
 
-    Start-Sleep -Seconds 3
-    if ((& $sshExe @sshArgs "sudo docker ps --filter name=frps --format '{{.Names}}'" 2>$null) -match "frps") {
-        Write-OK "frps is up on $frpServer."
+    Start-Sleep -Seconds 4
+    if ((& $sshExe @sshArgs "sudo ss -tln 2>/dev/null | grep -q ':$frpPort ' && echo UP" 2>$null) -match "UP") {
+        Write-OK "frps is up and listening on ${frpServer}:$frpPort."
     } else {
-        Write-Host "frps did not start. Debug: ssh -i $sshKey $sshUser@$frpServer 'sudo docker logs frps'" -ForegroundColor Red
+        Write-Host "frps not listening. Debug: ssh -i $sshKey $sshUser@$frpServer 'sudo docker logs frps'" -ForegroundColor Red
     }
 }
 
