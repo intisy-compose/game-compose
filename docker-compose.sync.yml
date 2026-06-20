@@ -41,6 +41,7 @@ services:
   data-sync:
     image: alpine:latest
     container_name: games_data_sync
+    profiles: ["minecraft", "hytale", "ark-ase", "ark-asa"]
     restart: unless-stopped
     volumes:
       - mc_data:/mc/config

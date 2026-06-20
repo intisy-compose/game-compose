@@ -3,6 +3,7 @@ services:
   playit:
     image: ghcr.io/playit-cloud/playit-agent:latest
     container_name: playit_agent
+    profiles: ["minecraft", "hytale", "ark-ase", "ark-asa"]
     restart: unless-stopped
     tty: true
     stdin_open: true
@@ -22,6 +23,7 @@ services:
   hytale:
     image: deinfreu/hytale-server:experimental
     container_name: hytale_server
+    profiles: ["hytale"]
     restart: unless-stopped
     tty: true
     stdin_open: true
@@ -41,6 +43,7 @@ services:
   minecraft:
     image: itzg/minecraft-server:java21-jdk
     container_name: minecraft_server
+    profiles: ["minecraft"]
     restart: unless-stopped
     tty: true
     stdin_open: true
@@ -61,6 +64,7 @@ services:
   ark-ase:
     image: hermsi/ark-server:latest
     container_name: ark_ase_server
+    profiles: ["ark-ase"]
     restart: unless-stopped
     tty: true
     stdin_open: true
@@ -91,6 +95,7 @@ services:
   ark-asa:
     image: acekorneya/asa_server:2_1_latest
     container_name: ark_asa_server
+    profiles: ["ark-asa"]
     restart: unless-stopped
     tty: true
     stdin_open: true
