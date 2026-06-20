@@ -3,7 +3,6 @@ services:
   playit:
     image: ghcr.io/playit-cloud/playit-agent:latest
     container_name: playit_agent
-    profiles: ["minecraft", "hytale", "ark-ase", "ark-asa"]
     restart: unless-stopped
     tty: true
     stdin_open: true

@@ -44,18 +44,15 @@ if (-not (Test-ChmodSupported)) {
 $action = if ($Targets) { $Targets[0].ToLower() } else { "" }
 
 switch ($action) {
-    ""     {
-        Write-Step "Creating all containers (stopped) for Docker Desktop..."
-        docker compose $composeFiles --profile "*" create
-        Write-OK "Created. Start them from Docker Desktop."
-        Write-Host "  Tip: start games_data_sync and playit_agent before a game."
-    }
-    "down" { Write-Step "Stopping everything..."; docker compose $composeFiles --profile "*" down }
-    "logs" { docker compose $composeFiles --profile "*" logs -f }
+    "down" { Write-Step "Stopping everything..."; docker compose $composeFiles --profile "*" down; break }
+    "logs" { docker compose $composeFiles --profile "*" logs -f; break }
     default {
-        $selected = $Targets | ForEach-Object { $_.ToLower() }
-        $unknown  = $selected | Where-Object { $_ -notin $games }
-        if ($unknown) { Write-Host "Unknown server(s): $($unknown -join ', ')" -ForegroundColor Red; Show-Usage; exit 1 }
+        $selected = @()
+        if ($action -ne "") {
+            $selected = $Targets | ForEach-Object { $_.ToLower() }
+            $unknown  = $selected | Where-Object { $_ -notin $games }
+            if ($unknown) { Write-Host "Unknown server(s): $($unknown -join ', ')" -ForegroundColor Red; Show-Usage; exit 1 }
+        }
 
         Assert-Admin -ArgLine ($selected -join ' ')
 
@@ -64,11 +61,18 @@ switch ($action) {
         netsh int ipv4 add excludedportrange protocol=tcp startport=25565 numberofports=1 | Out-Null
         net start winnat | Out-Null
 
-        $profileArgs = @()
-        foreach ($g in $selected) { $profileArgs += @("--profile", $g) }
-        Write-Step "Starting: $($selected -join ', ')"
-        docker compose $composeFiles $profileArgs up -d
-        Write-OK "Running. Stop with: .\docker-compose.ps1 down"
+        Write-Step "Creating game containers (stopped) and starting playit + sync..."
+        docker compose $composeFiles --profile "*" create
+        docker compose $composeFiles up -d
+
+        if ($selected) {
+            $profileArgs = @()
+            foreach ($g in $selected) { $profileArgs += @("--profile", $g) }
+            Write-Step "Starting: $($selected -join ', ')"
+            docker compose $composeFiles $profileArgs up -d
+        }
+
+        Write-OK "playit + sync running; games are in Docker Desktop ready to start."
         Write-Host "`nPress Enter to exit..."
         $null = Read-Host
     }
