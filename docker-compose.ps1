@@ -17,10 +17,10 @@ function Write-Step([string]$msg) { Write-Host $msg -ForegroundColor Cyan }
 function Write-OK([string]$msg)   { Write-Host "  $msg" -ForegroundColor Green }
 function Show-Usage {
     Write-Host "Usage: .\docker-compose.ps1 [<game>...|down|logs]"
-    Write-Host "  Games (none run by default): $($games -join ', ')"
-    Write-Host "  e.g. .\docker-compose.ps1 minecraft       run one server"
-    Write-Host "       .\docker-compose.ps1 minecraft hytale  run several"
-    Write-Host "       .\docker-compose.ps1 down              stop everything"
+    Write-Host "  (no args)  create all containers (stopped) for Docker Desktop"
+    Write-Host "  <game>...  run server(s) now: $($games -join ', ')"
+    Write-Host "  down       stop and remove everything"
+    Write-Host "  logs       follow logs"
 }
 
 # Paper writes configs atomically (temp -> chmod -> rename). Docker Desktop's
@@ -44,7 +44,12 @@ if (-not (Test-ChmodSupported)) {
 $action = if ($Targets) { $Targets[0].ToLower() } else { "" }
 
 switch ($action) {
-    ""     { Show-Usage }
+    ""     {
+        Write-Step "Creating all containers (stopped) for Docker Desktop..."
+        docker compose $composeFiles --profile "*" create
+        Write-OK "Created. Start them from Docker Desktop."
+        Write-Host "  Tip: start games_data_sync and playit_agent before a game."
+    }
     "down" { Write-Step "Stopping everything..."; docker compose $composeFiles --profile "*" down }
     "logs" { docker compose $composeFiles --profile "*" logs -f }
     default {
