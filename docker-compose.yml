@@ -46,6 +46,7 @@ services:
     image: deinfreu/hytale-server:experimental
     container_name: hytale_server
     profiles: ["hytale"]
+    user: "0:0"
     restart: unless-stopped
     tty: true
     stdin_open: true
@@ -70,6 +71,9 @@ services:
     network_mode: "service:${TUNNEL:-playit}"
     environment:
       EULA: "TRUE"
+      # Run as root so atomic config writes (chmod) work on the bind mount.
+      UID: "0"
+      GID: "0"
       # Pinned: "LATEST" jumped to 26.1.2 (needs Java 25, breaks the Iris
       # datapacks). Bump only after validating plugins.
       VERSION: "1.21.11"

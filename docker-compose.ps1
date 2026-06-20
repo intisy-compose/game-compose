@@ -31,15 +31,6 @@ function Show-Usage {
     Write-Host "  vps        set up / verify the frp server on the VPS (TUNNEL=frp)"
 }
 
-# Paper writes configs atomically (temp -> chmod -> rename). Docker Desktop's
-# Windows bind mounts report files as root-owned, so non-root servers can't chmod
-# and crash-loop. Probe as uid 1000: if it fails, use the volume + sync override.
-function Test-ChmodSupported {
-    docker run --rm -u 1000:1000 -v "${dataDir}:/probe" alpine `
-        sh -c 'touch /probe/.chmodprobe && chmod 600 /probe/.chmodprobe; r=$?; rm -f /probe/.chmodprobe; exit $r' 2>$null | Out-Null
-    return ($LASTEXITCODE -eq 0)
-}
-
 # Provisions frps on the VPS over SSH if it isn't already running: installs
 # Docker, opens the firewall, writes the token config, and starts the container.
 # Idempotent — safe to call on every frp start.
@@ -103,10 +94,6 @@ $sshKey    = if ($env:FRP_SSH_KEY)  { $env:FRP_SSH_KEY }  else { "vps/ssh-key" }
 if ($sshKey -and -not [System.IO.Path]::IsPathRooted($sshKey)) { $sshKey = Join-Path $PSScriptRoot $sshKey }
 
 $composeFiles = @("-f", "$PSScriptRoot\docker-compose.yml")
-if (-not (Test-ChmodSupported)) {
-    Write-Step "Data partition can't chmod; using volumes + sync mirror."
-    $composeFiles += @("-f", "$PSScriptRoot\docker-compose.sync.yml")
-}
 
 $action = if ($Targets) { $Targets[0].ToLower() } else { "" }
 
