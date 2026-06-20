@@ -1,0 +1,10 @@
+# Copy this folder to your VPS and run: docker compose up -d
+# host networking so frps binds 7000 + the game ports on the public interface.
+services:
+  frps:
+    image: snowdreamtech/frps:latest
+    container_name: frps
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./frps.toml:/etc/frp/frps.toml:ro
