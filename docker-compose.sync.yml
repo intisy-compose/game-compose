@@ -51,26 +51,23 @@ services:
       - ./ark_ase_data:/ase/sync
       - ark_asa_data:/asa/config
       - ./ark_asa_data:/asa/sync
+      - games_sync_state:/state
     command:
       - sh
       - -c
       - |
-        apk add --no-cache rsync >/dev/null
+        apk add --no-cache unison >/dev/null
         set -f
-        # Skip re-downloadable installs and temp files (images refetch these).
-        EX="--exclude=paper-*.jar --exclude=libraries/ --exclude=versions/ --exclude=cache/ --exclude=.cache/ --exclude=.paper-remapped/ --exclude=.java/ --exclude=crash-reports/ --exclude=logs/ --exclude=log/ --exclude=Assets.zip --exclude=Server/ --exclude=steamapps/ --exclude=Binaries/ --exclude=Content/ --exclude=*.sync-conflict-*"
-        # Into the volume, then make it world-writable so any server uid
-        # (1000/1001/...) can overwrite rsync-copied files. Out: no perm ops.
-        for g in mc hytale ase asa; do
-          rsync -rt --delete --no-perms --no-owner --no-group $$EX /$$g/sync/ /$$g/config/
-          chmod -R a+rwX /$$g/config
-        done
-        touch /tmp/synced
+        export UNISON=/state
+        umask 000
+        # Ignore re-downloadable installs and temp/state (images refetch these).
+        IGN="-ignore 'Name .git' -ignore 'Name *.sync-conflict-*' -ignore 'Name logs' -ignore 'Name log' -ignore 'Name cache' -ignore 'Name .cache' -ignore 'Name libraries' -ignore 'Name versions' -ignore 'Name .paper-remapped' -ignore 'Name .java' -ignore 'Name crash-reports' -ignore 'Name Assets.zip' -ignore 'Name Server' -ignore 'Name steamapps' -ignore 'Name Binaries' -ignore 'Name Content' -ignore 'Name paper-*.jar'"
         while true; do
           for g in mc hytale ase asa; do
-            rsync -rt --delete --no-perms --no-owner --no-group $$EX /$$g/config/ /$$g/sync/
+            eval unison /$$g/config /$$g/sync -batch -prefer newer -times -perms 0 -dontchmod $$IGN >/dev/null 2>&1
           done
-          sleep 30
+          touch /tmp/synced
+          sleep 15
         done
     healthcheck:
       test: ["CMD", "test", "-f", "/tmp/synced"]
@@ -88,3 +85,5 @@ volumes:
     name: ark_ase_data
   ark_asa_data:
     name: ark_asa_data
+  games_sync_state:
+    name: games_sync_state
