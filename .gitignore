@@ -28,3 +28,6 @@ ark_ase_data/ShooterGame/Saved/Logs/
 # Ark ASA
 ark_asa_data/Saved/SavedArks/
 ark_asa_data/Saved/Logs/
+
+# Tunnel/provider secrets
+config.env

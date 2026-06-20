@@ -3,6 +3,7 @@ services:
   playit:
     image: ghcr.io/playit-cloud/playit-agent:latest
     container_name: playit_agent
+    profiles: ["playit"]
     restart: unless-stopped
     tty: true
     stdin_open: true
@@ -16,7 +17,29 @@ services:
       - "7779:7779/udp"
       - "7780:7780/udp"
     environment:
-      - SECRET_KEY=5d91bbcf4870611e54cbd074083d00f0ec09e71c8db0bcb5c2ee4deebf20bd10
+      - SECRET_KEY=${PLAYIT_SECRET}
+
+  # --- frp Tunnel (alternative to playit; needs self-hosted frps on a VPS) ---
+  frp:
+    image: snowdreamtech/frpc:latest
+    container_name: frp_client
+    profiles: ["frp"]
+    restart: unless-stopped
+    ports:
+      - "5520:5520/udp"
+      - "25565:25565"
+      - "19132:19132/udp"
+      - "7777:7777/udp"
+      - "7778:7778/udp"
+      - "27015:27015/udp"
+      - "7779:7779/udp"
+      - "7780:7780/udp"
+    environment:
+      - FRP_SERVER_ADDR=${FRP_SERVER_ADDR:-}
+      - FRP_SERVER_PORT=${FRP_SERVER_PORT:-7000}
+      - FRP_TOKEN=${FRP_TOKEN:-}
+    volumes:
+      - ./frpc.toml:/etc/frp/frpc.toml:ro
 
   # --- Hytale Server ---
   hytale:
@@ -26,9 +49,7 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-    network_mode: service:playit
-    depends_on:
-      - playit
+    network_mode: "service:${TUNNEL:-playit}"
     environment:
       SERVER_IP: "0.0.0.0"
       SERVER_PORT: "5520"
@@ -46,9 +67,7 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-    network_mode: service:playit
-    depends_on:
-      - playit
+    network_mode: "service:${TUNNEL:-playit}"
     environment:
       EULA: "TRUE"
       # Pinned: "LATEST" jumped to 26.1.2 (needs Java 25, breaks the Iris
@@ -67,9 +86,7 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-    network_mode: service:playit
-    depends_on:
-      - playit
+    network_mode: "service:${TUNNEL:-playit}"
     environment:
       SESSION_NAME: "Ark Server"
       SERVER_MAP: "TheIsland"
@@ -98,9 +115,7 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-    network_mode: service:playit
-    depends_on:
-      - playit
+    network_mode: "service:${TUNNEL:-playit}"
     environment:
       PUID: "1001"
       PGID: "1001"

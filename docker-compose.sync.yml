@@ -6,8 +6,6 @@ services:
     volumes: !override
       - mc_data:/data
     depends_on: !override
-      playit:
-        condition: service_started
       data-sync:
         condition: service_healthy
 
@@ -15,8 +13,6 @@ services:
     volumes: !override
       - hytale_data:/home/container/game
     depends_on: !override
-      playit:
-        condition: service_started
       data-sync:
         condition: service_healthy
 
@@ -24,8 +20,6 @@ services:
     volumes: !override
       - ark_ase_data:/app
     depends_on: !override
-      playit:
-        condition: service_started
       data-sync:
         condition: service_healthy
 
@@ -33,8 +27,6 @@ services:
     volumes: !override
       - ark_asa_data:/usr/games/.wine/drive_c/POK/Steam/steamapps/common/ARK Survival Ascended Dedicated Server/ShooterGame
     depends_on: !override
-      playit:
-        condition: service_started
       data-sync:
         condition: service_healthy
 

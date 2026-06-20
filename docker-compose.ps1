@@ -15,6 +15,13 @@ function Assert-Admin([string]$ArgLine) {
 }
 function Write-Step([string]$msg) { Write-Host $msg -ForegroundColor Cyan }
 function Write-OK([string]$msg)   { Write-Host "  $msg" -ForegroundColor Green }
+function Import-Config([string]$Path) {
+    if (-not (Test-Path $Path)) { return }
+    Get-Content $Path | Where-Object { $_ -notmatch '^\s*#' -and $_ -match '=' } | ForEach-Object {
+        $k, $v = $_ -split '=', 2
+        Set-Item "env:$($k.Trim())" $v.Trim()
+    }
+}
 function Show-Usage {
     Write-Host "Usage: .\docker-compose.ps1 [<game>...|down|logs]"
     Write-Host "  (no args)  create all containers (stopped) for Docker Desktop"
@@ -34,6 +41,11 @@ function Test-ChmodSupported {
 
 Set-Location $PSScriptRoot
 if (-not (Test-Path $dataDir)) { New-Item -ItemType Directory -Force $dataDir | Out-Null }
+
+Import-Config "$PSScriptRoot\config.env"
+if (-not $env:TUNNEL) { $env:TUNNEL = "playit" }
+$tunnel = $env:TUNNEL.ToLower()
+$env:TUNNEL = $tunnel
 
 $composeFiles = @("-f", "$PSScriptRoot\docker-compose.yml")
 if (-not (Test-ChmodSupported)) {
@@ -61,18 +73,18 @@ switch ($action) {
         netsh int ipv4 add excludedportrange protocol=tcp startport=25565 numberofports=1 | Out-Null
         net start winnat | Out-Null
 
-        Write-Step "Creating game containers (stopped) and starting playit + sync..."
+        Write-Step "Creating game containers (stopped); starting $tunnel + sync..."
         docker compose $composeFiles --profile "*" create
-        docker compose $composeFiles up -d
+        docker compose $composeFiles --profile $tunnel up -d
 
         if ($selected) {
-            $profileArgs = @()
+            $profileArgs = @("--profile", $tunnel)
             foreach ($g in $selected) { $profileArgs += @("--profile", $g) }
             Write-Step "Starting: $($selected -join ', ')"
             docker compose $composeFiles $profileArgs up -d
         }
 
-        Write-OK "playit + sync running; games are in Docker Desktop ready to start."
+        Write-OK "$tunnel + sync running; games are in Docker Desktop ready to start."
         Write-Host "`nPress Enter to exit..."
         $null = Read-Host
     }

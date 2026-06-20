@@ -1,0 +1,62 @@
+# frp client config. Server address/token come from config.env (FRP_* env vars).
+# Used only when TUNNEL=frp. Players connect to <FRP_SERVER_ADDR>:<remotePort>.
+serverAddr = "{{ .Envs.FRP_SERVER_ADDR }}"
+serverPort = {{ .Envs.FRP_SERVER_PORT }}
+auth.method = "token"
+auth.token = "{{ .Envs.FRP_TOKEN }}"
+
+[[proxies]]
+name = "minecraft-java"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 25565
+remotePort = 25565
+
+[[proxies]]
+name = "minecraft-bedrock"
+type = "udp"
+localIP = "127.0.0.1"
+localPort = 19132
+remotePort = 19132
+
+[[proxies]]
+name = "hytale"
+type = "udp"
+localIP = "127.0.0.1"
+localPort = 5520
+remotePort = 5520
+
+[[proxies]]
+name = "ark-ase-game"
+type = "udp"
+localIP = "127.0.0.1"
+localPort = 7777
+remotePort = 7777
+
+[[proxies]]
+name = "ark-ase-raw"
+type = "udp"
+localIP = "127.0.0.1"
+localPort = 7778
+remotePort = 7778
+
+[[proxies]]
+name = "ark-query"
+type = "udp"
+localIP = "127.0.0.1"
+localPort = 27015
+remotePort = 27015
+
+[[proxies]]
+name = "ark-asa-game"
+type = "udp"
+localIP = "127.0.0.1"
+localPort = 7779
+remotePort = 7779
+
+[[proxies]]
+name = "ark-asa-raw"
+type = "udp"
+localIP = "127.0.0.1"
+localPort = 7780
+remotePort = 7780
