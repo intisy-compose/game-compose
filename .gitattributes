@@ -1,2 +1,9 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Keep LF so inline shell in compose files and the SSH key survive a clone.
+* text=auto eol=lf
+*.toml  text eol=lf
+*.sh    text eol=lf
+# SSH key: never touch line endings.
+vps/ssh-key     -text
+vps/ssh-key.pub -text
+# Windows launcher stays CRLF (cmd is picky); PowerShell is fine either way.
+*.bat   text eol=crlf
