@@ -59,10 +59,11 @@ services:
         set -f
         # Skip re-downloadable installs and temp files (images refetch these).
         EX="--exclude=paper-*.jar --exclude=libraries/ --exclude=versions/ --exclude=cache/ --exclude=.cache/ --exclude=.paper-remapped/ --exclude=.java/ --exclude=crash-reports/ --exclude=logs/ --exclude=log/ --exclude=Assets.zip --exclude=Server/ --exclude=steamapps/ --exclude=Binaries/ --exclude=Content/ --exclude=*.sync-conflict-*"
-        # Into the volume: world-writable so any server uid (1000/1001/...) can
-        # write the rsync-copied files. Out to the folder: no perm/owner ops.
+        # Into the volume, then make it world-writable so any server uid
+        # (1000/1001/...) can overwrite rsync-copied files. Out: no perm ops.
         for g in mc hytale ase asa; do
-          rsync -rt --delete --chmod=Da+rwx,Fa+rw $$EX /$$g/sync/ /$$g/config/
+          rsync -rt --delete --no-perms --no-owner --no-group $$EX /$$g/sync/ /$$g/config/
+          chmod -R a+rwX /$$g/config
         done
         touch /tmp/synced
         while true; do
