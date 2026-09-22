@@ -1,12 +1,14 @@
-[submodule "hytale_data"]
-	path = hytale_data
-	url = https://github.com/intisy/hytale-server-data.git
+# Default data sources are PUBLIC templates so a fresh clone runs out of the box.
+# Swap a slot to your own (private) data repo with:  ./data.sh use <slot> <owner/repo[@ref]>
 [submodule "mc_data"]
 	path = mc_data
-	url = https://github.com/intisy/mc-server-data.git
+	url = https://github.com/intisy-compose/mc-server-data-template.git
+[submodule "hytale_data"]
+	path = hytale_data
+	url = https://github.com/intisy-compose/hytale-server-data-template.git
 [submodule "ark_ase_data"]
 	path = ark_ase_data
-	url = https://github.com/intisy/ark-ase-server-data.git
+	url = https://github.com/intisy-compose/ark-ase-server-data-template.git
 [submodule "ark_asa_data"]
 	path = ark_asa_data
-	url = https://github.com/intisy/ark-asa-server-data.git
+	url = https://github.com/intisy-compose/ark-asa-server-data-template.git

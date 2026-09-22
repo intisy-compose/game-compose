@@ -31,3 +31,7 @@ ark_asa_data/Saved/Logs/
 
 # Tunnel/provider secrets
 config.env
+
+# VPS SSH key — generate your own; never commit (see vps/ and README)
+vps/ssh-key
+vps/ssh-key.pub
