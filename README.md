@@ -1,8 +1,6 @@
 # game-compose
 
-A Docker stack for self-hosting several game servers (Minecraft, Hytale, ARK:
-Survival Evolved, ARK: Survival Ascended) behind a single public tunnel, with each
-server's data kept in its own **swappable data repo**.
+A Docker stack for self-hosting several game servers (Minecraft, Hytale, ARK: Survival Evolved, ARK: Survival Ascended) behind a single public tunnel, with each server's data kept in its own **swappable data repo**.
 
 ## Servers
 
@@ -60,4 +58,4 @@ SSH key into `vps/ssh-key` (gitignored) and set a matching `auth.token` in
 
 ## License
 
-MIT - see [LICENSE](LICENSE).
+[![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
