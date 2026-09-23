@@ -55,9 +55,9 @@ function Resolve-DataSource([string]$Path, [string]$Source) {
 function Set-DataSource([string]$Path, [string]$Source) {
     $resolved = Resolve-DataSource $Path $Source
     Write-Step "Pointing $Path at $($resolved.Url) @ $($resolved.Ref)"
+    if (-not (Test-Path "$Path\.git")) { git submodule update --init -- $Path 2>$null | Out-Null }
     git config "submodule.$Path.url" $resolved.Url
-    git submodule sync -- $Path | Out-Null
-    git submodule update --init -- $Path 2>$null | Out-Null
+    git -C $Path remote set-url origin $resolved.Url
     git -C $Path fetch -q origin $resolved.Ref
     git -C $Path checkout -q FETCH_HEAD
     Write-OK "$Path now at $(git -C $Path rev-parse --short HEAD)"
