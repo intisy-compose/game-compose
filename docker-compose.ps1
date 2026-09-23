@@ -23,12 +23,77 @@ function Import-Config([string]$Path) {
     }
 }
 function Show-Usage {
-    Write-Host "Usage: .\docker-compose.ps1 [<game>...|down|logs]"
-    Write-Host "  (no args)  create all containers (stopped) for Docker Desktop"
-    Write-Host "  <game>...  run server(s) now: $($games -join ', ')"
-    Write-Host "  down       stop and remove everything"
-    Write-Host "  logs       follow logs"
-    Write-Host "  vps        set up / verify the frp server on the VPS (TUNNEL=frp)"
+    Write-Host "Usage: .\docker-compose.ps1 [<game>...|down|logs|vps|console|data]"
+    Write-Host "  (no args)        create all containers (stopped) for Docker Desktop"
+    Write-Host "  <game>...        run server(s) now: $($games -join ', ')"
+    Write-Host "  down             stop and remove everything"
+    Write-Host "  logs             follow logs"
+    Write-Host "  vps              set up / verify the frp server on the VPS (TUNNEL=frp)"
+    Write-Host "  console [name]   attach to a console: $($consoles.Keys -join ', ')"
+    Write-Host "  data list        show data slots and their default (public template) source"
+    Write-Host "  data status      show each slot's checked-out commit"
+    Write-Host "  data use <slot> [owner/repo[@ref]]"
+    Write-Host "                   point a slot at a data repo (no source = public template)"
+    Write-Host "Data slots: $($dataSlots.Keys -join ', ')"
+}
+
+$dataSlots = [ordered]@{ mc = "mc_data"; hytale = "hytale_data"; "ark-ase" = "ark_ase_data"; "ark-asa" = "ark_asa_data" }
+$consoles  = [ordered]@{
+    minecraft = "minecraft_server"; hytale = "hytale_server"; playit = "playit_agent"
+    "ark-ase" = "ark_ase_server"; "ark-asa" = "ark_asa_server"
+}
+
+function Resolve-DataSource([string]$Path, [string]$Source) {
+    if ([string]::IsNullOrEmpty($Source)) {
+        return @{ Url = (git config -f .gitmodules "submodule.$Path.url"); Ref = "main" }
+    }
+    $parts = $Source.Split("@", 2)
+    $url = if ($parts[0] -match "://|^git@") { $parts[0] } else { "https://github.com/$($parts[0]).git" }
+    return @{ Url = $url; Ref = $(if ($parts.Count -eq 2) { $parts[1] } else { "main" }) }
+}
+
+function Set-DataSource([string]$Path, [string]$Source) {
+    $resolved = Resolve-DataSource $Path $Source
+    Write-Step "Pointing $Path at $($resolved.Url) @ $($resolved.Ref)"
+    git config "submodule.$Path.url" $resolved.Url
+    git submodule sync -- $Path | Out-Null
+    git submodule update --init -- $Path 2>$null | Out-Null
+    git -C $Path fetch -q origin $resolved.Ref
+    git -C $Path checkout -q FETCH_HEAD
+    Write-OK "$Path now at $(git -C $Path rev-parse --short HEAD)"
+}
+
+function Invoke-Data([string[]]$Arguments) {
+    $subcommand = if ($Arguments) { $Arguments[0].ToLower() } else { "list" }
+    switch ($subcommand) {
+        "list" {
+            foreach ($slot in $dataSlots.Keys) {
+                "{0,-9} {1,-14} {2}" -f $slot, $dataSlots[$slot], (git config -f .gitmodules "submodule.$($dataSlots[$slot]).url")
+            }
+        }
+        "status" { git submodule status }
+        "use" {
+            $slot = if ($Arguments.Count -ge 2) { $Arguments[1].ToLower() } else { "" }
+            if (-not $dataSlots.Contains($slot)) { Write-Host "Unknown data slot '$slot'" -ForegroundColor Red; Show-Usage; exit 1 }
+            Set-DataSource $dataSlots[$slot] $(if ($Arguments.Count -ge 3) { $Arguments[2] } else { "" })
+        }
+        default { Show-Usage; exit 1 }
+    }
+}
+
+function Enter-Console([string]$Name) {
+    if (-not $Name) {
+        $names = @($consoles.Keys)
+        for ($index = 0; $index -lt $names.Count; $index++) { Write-Host "$($index + 1)) $($names[$index])" }
+        $choice = Read-Host "Enter choice [1-$($names.Count)]"
+        if ($choice -notmatch '^\d+$' -or [int]$choice -lt 1 -or [int]$choice -gt $names.Count) {
+            Write-Host "Invalid choice." -ForegroundColor Red; exit 1
+        }
+        $Name = $names[[int]$choice - 1]
+    }
+    if (-not $consoles.Contains($Name.ToLower())) { Write-Host "Unknown console '$Name'" -ForegroundColor Red; Show-Usage; exit 1 }
+    Write-Step "Attaching to $Name... (Ctrl+P, Ctrl+Q to detach)"
+    docker attach $consoles[$Name.ToLower()]
 }
 
 # Provisions frps on the VPS over SSH if it isn't already running: installs
@@ -96,8 +161,12 @@ if ($sshKey -and -not [System.IO.Path]::IsPathRooted($sshKey)) { $sshKey = Join-
 $composeFiles = @("-f", "$PSScriptRoot\docker-compose.yml")
 
 $action = if ($Targets) { $Targets[0].ToLower() } else { "" }
+$rest   = @(if ($Targets -and $Targets.Count -gt 1) { $Targets[1..($Targets.Count - 1)] })
 
 switch ($action) {
+    "help"    { Show-Usage; break }
+    "data"    { Invoke-Data $rest; break }
+    "console" { Enter-Console $(if ($rest) { $rest[0] } else { "" }); break }
     "vps"  { Ensure-Frps; break }
     "down" { Write-Step "Stopping everything..."; docker compose $composeFiles --profile "*" down; break }
     "logs" { docker compose $composeFiles --profile "*" logs -f; break }

@@ -14,17 +14,16 @@ provider with `TUNNEL=playit` (default) or `TUNNEL=frp` in `config.env`.
 
 Requires [Docker](https://docs.docker.com/get-docker/).
 
-```bash
+```powershell
 git clone --recursive https://github.com/intisy-compose/game-compose
 cd game-compose
 cp config.env.example config.env      # set TUNNEL + provider credentials
 
-# start (Windows: docker-compose.ps1 / .bat, Linux/macOS: docker-compose.sh)
-./docker-compose.sh
+.\docker-compose.ps1                  # the one CLI; `.\docker-compose.ps1 help` lists every command
 ```
 
 `--recursive` checks out the **public template** data for every slot, so the stack
-runs immediately. Use `enter-console.sh` / `.bat` to attach to a server console.
+runs immediately. Attach to a server console with `.\docker-compose.ps1 console [name]`.
 
 ## Data repos (swappable)
 
@@ -34,16 +33,16 @@ default is a **public template** (`intisy-compose/<game>-server-data-template`) 
 fresh clone works and exposes nothing private. Keep your real servers in private
 repos and switch on the go:
 
-```bash
-./data.sh list                                   # slots and their default source
-./data.sh use mc intisy-compose/mc-server-data   # your private data
-./data.sh use mc intisy-compose/mc-server-data@winter   # a specific branch
-./data.sh use mc                                 # restore the public template
+```powershell
+.\docker-compose.ps1 data list                                        # slots and their default source
+.\docker-compose.ps1 data use mc intisy-compose/mc-server-data        # your private data
+.\docker-compose.ps1 data use mc intisy-compose/mc-server-data@winter # a specific branch
+.\docker-compose.ps1 data use mc                                      # restore the public template
 ```
 
 Maintain as many data repos or branches as you like and point a slot at whichever
 you want to run. Worlds, saves and logs are gitignored in the data repos - commit
-configuration, not runtime state. (`data.ps1` is the PowerShell equivalent.)
+configuration, not runtime state.
 
 ## Public exposure
 

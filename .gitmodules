@@ -1,5 +1,5 @@
 # Default data sources are PUBLIC templates so a fresh clone runs out of the box.
-# Swap a slot to your own (private) data repo with:  ./data.sh use <slot> <owner/repo[@ref]>
+# Swap a slot to your own (private) data repo with:  .\docker-compose.ps1 data use <slot> <owner/repo[@ref]>
 [submodule "mc_data"]
 	path = mc_data
 	url = https://github.com/intisy-compose/mc-server-data-template.git
