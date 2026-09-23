@@ -33,7 +33,7 @@ function Show-Usage {
 
 # Provisions frps on the VPS over SSH if it isn't already running: installs
 # Docker, opens the firewall, writes the token config, and starts the container.
-# Idempotent — safe to call on every frp start.
+# Idempotent - safe to call on every frp start.
 function Ensure-Frps {
     if (-not $frpServer) { Write-Host "FRP_SERVER_ADDR not set in config.env" -ForegroundColor Red; exit 1 }
     if (-not (Test-Path $sshKey)) { Write-Host "SSH key not found: $sshKey" -ForegroundColor Red; exit 1 }

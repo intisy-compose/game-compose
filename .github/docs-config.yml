@@ -1,0 +1,2 @@
+kind: generic
+description: "A Docker stack for self-hosting several game servers (Minecraft, Hytale, ARK: Survival Evolved, ARK: Survival Ascended) behind a single public tunnel, with each server's data kept in its own **swappable data repo**."
