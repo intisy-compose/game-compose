@@ -1,4 +1,4 @@
-# frp SERVER config — runs on your VPS (public IP), not at home.
+# frp SERVER config - runs on your VPS (public IP), not at home.
 # frpc (home) connects to bindPort; the game ports open automatically when it
 # connects. auth.token MUST match FRP_TOKEN in the home config.env.
 bindPort = 7000

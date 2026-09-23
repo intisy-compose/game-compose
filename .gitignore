@@ -1,12 +1,15 @@
+# Local config and secrets (copy config.env from config.env.example; generate your own VPS key)
+config.env
+vps/ssh-key
+vps/ssh-key.pub
+
+# Runtime data: Minecraft (Paper)
 logs/
 .disabled/
-*cache/
 libraries/
 versions/
 .paper-remapped/
-
 session.lock
-
 .papermc-manifest.json
 .rcon-cli.env
 .rcon-cli.yaml
@@ -14,24 +17,18 @@ session.lock
 ops.json
 usercache.json
 version_history.json
+paper-*.jar
 
+# Runtime data: Hytale
 Server/
 
-paper-*.jar
-*.zip
-*.tmp
-
-# Ark ASE
+# Runtime data: ARK (ASE and ASA)
 ark_ase_data/ShooterGame/Saved/SavedArks/
 ark_ase_data/ShooterGame/Saved/Logs/
-
-# Ark ASA
 ark_asa_data/Saved/SavedArks/
 ark_asa_data/Saved/Logs/
 
-# Tunnel/provider secrets
-config.env
-
-# VPS SSH key — generate your own; never commit (see vps/ and README)
-vps/ssh-key
-vps/ssh-key.pub
+# Caches and downloads
+*cache/
+*.zip
+*.tmp
