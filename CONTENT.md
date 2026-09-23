@@ -1,9 +1,3 @@
-# game-compose
-
-A Docker stack for self-hosting several game servers (Minecraft, Hytale, ARK:
-Survival Evolved, ARK: Survival Ascended) behind a single public tunnel, with each
-server's data kept in its own **swappable data repo**.
-
 ## Servers
 
 | slot | service | image |
@@ -57,7 +51,3 @@ configuration, not runtime state. (`data.ps1` is the PowerShell equivalent.)
 SSH key into `vps/ssh-key` (gitignored) and set a matching `auth.token` in
 `vps/frps.toml` and `FRP_TOKEN` in `config.env`. `TUNNEL=playit` uses a
 [playit.gg](https://playit.gg/) agent instead (`PLAYIT_SECRET`).
-
-## License
-
-MIT - see [LICENSE](LICENSE).
