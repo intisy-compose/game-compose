@@ -2,7 +2,7 @@ services:
   # --- Playit.gg Tunnel (The Network "Boss") ---
   playit:
     image: ghcr.io/playit-cloud/playit-agent:latest
-    container_name: playit_agent
+    container_name: game-playit
     profiles: ["playit"]
     restart: unless-stopped
     tty: true
@@ -22,7 +22,7 @@ services:
   # --- frp Tunnel (alternative to playit; needs self-hosted frps on a VPS) ---
   frp:
     image: snowdreamtech/frpc:latest
-    container_name: frp_client
+    container_name: game-frp
     profiles: ["frp"]
     restart: unless-stopped
     ports:
@@ -44,7 +44,7 @@ services:
   # --- Hytale Server ---
   hytale:
     image: deinfreu/hytale-server:experimental
-    container_name: hytale_server
+    container_name: game-hytale
     profiles: ["hytale"]
     user: "0:0"
     restart: unless-stopped
@@ -63,7 +63,7 @@ services:
   # --- Minecraft Server ---
   minecraft:
     image: itzg/minecraft-server:java21-jdk
-    container_name: minecraft_server
+    container_name: game-minecraft
     profiles: ["minecraft"]
     restart: unless-stopped
     tty: true
@@ -85,7 +85,7 @@ services:
   # --- Ark: Survival Evolved Server ---
   ark-ase:
     image: hermsi/ark-server:latest
-    container_name: ark_ase_server
+    container_name: game-ark-ase
     profiles: ["ark-ase"]
     restart: unless-stopped
     tty: true
@@ -114,7 +114,7 @@ services:
   # --- Ark: Survival Ascended Server ---
   ark-asa:
     image: acekorneya/asa_server:2_1_latest
-    container_name: ark_asa_server
+    container_name: game-ark-asa
     profiles: ["ark-asa"]
     restart: unless-stopped
     tty: true

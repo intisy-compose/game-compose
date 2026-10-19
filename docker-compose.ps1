@@ -39,8 +39,8 @@ function Show-Usage {
 
 $dataSlots = [ordered]@{ mc = "mc_data"; hytale = "hytale_data"; "ark-ase" = "ark_ase_data"; "ark-asa" = "ark_asa_data" }
 $consoles  = [ordered]@{
-    minecraft = "minecraft_server"; hytale = "hytale_server"; playit = "playit_agent"
-    "ark-ase" = "ark_ase_server"; "ark-asa" = "ark_asa_server"
+    minecraft = "game-minecraft"; hytale = "game-hytale"; playit = "game-playit"
+    "ark-ase" = "game-ark-ase"; "ark-asa" = "game-ark-asa"
 }
 
 function Resolve-DataSource([string]$Path, [string]$Source) {
