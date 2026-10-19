@@ -22,6 +22,17 @@ function Import-Config([string]$Path) {
         Set-Item "env:$($k.Trim())" $v.Trim()
     }
 }
+# Hyper-V reserves random port ranges at boot and can take Minecraft's; the reservation is
+# `store=active` so a stack deleted without `down` leaves nothing after the next reboot.
+$minecraftPort = 25565
+function Add-MinecraftPortReservation {
+    net stop winnat  | Out-Null
+    netsh int ipv4 add excludedportrange protocol=tcp startport=$minecraftPort numberofports=1 store=active | Out-Null
+    net start winnat | Out-Null
+}
+function Remove-MinecraftPortReservation {
+    netsh int ipv4 delete excludedportrange protocol=tcp startport=$minecraftPort numberofports=1 store=active | Out-Null
+}
 function Show-Usage {
     Write-Host "Usage: .\docker-compose.ps1 [<game>...|down|logs|vps|console|data]"
     Write-Host "  (no args)        create all containers (stopped) for Docker Desktop"
@@ -168,7 +179,13 @@ switch ($action) {
     "data"    { Invoke-Data $rest; break }
     "console" { Enter-Console $(if ($rest) { $rest[0] } else { "" }); break }
     "vps"  { Ensure-Frps; break }
-    "down" { Write-Step "Stopping everything..."; docker compose $composeFiles --profile "*" down; break }
+    "down" {
+        Assert-Admin -ArgLine "down"
+        Write-Step "Stopping everything..."
+        docker compose $composeFiles --profile "*" down
+        Remove-MinecraftPortReservation
+        break
+    }
     "logs" { docker compose $composeFiles --profile "*" logs -f; break }
     default {
         $selected = @()
@@ -183,9 +200,7 @@ switch ($action) {
         if ($tunnel -eq "frp") { Ensure-Frps }
 
         Write-Step "Reserving ports from Hyper-V..."
-        net stop winnat  | Out-Null
-        netsh int ipv4 add excludedportrange protocol=tcp startport=25565 numberofports=1 | Out-Null
-        net start winnat | Out-Null
+        Add-MinecraftPortReservation
 
         Write-Step "Creating game containers (stopped); starting $tunnel + sync..."
         docker compose $composeFiles --profile "*" create
